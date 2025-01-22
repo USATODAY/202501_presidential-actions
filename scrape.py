@@ -98,6 +98,7 @@ def load_scraped_links():
     try:
         # Load previously scraped data from a CSV file (or database)
         df = pd.read_csv('scraped_whitehouse_posts.csv')
+        df.drop_duplicates(inplace=True)
         return set(df['Link'])  # Return a set of links from the CSV
     except FileNotFoundError:
         return set()  # If no file exists, return an empty set
@@ -105,6 +106,7 @@ def load_scraped_links():
 # Save new data to a CSV file
 def save_scraped_data(new_data):
     df = pd.DataFrame(new_data)
+    df.drop_duplicates(inplace=True)
     df.to_csv('scraped_whitehouse_posts.csv', mode='a', header=False, index=False)
 
 # Create a session
@@ -134,6 +136,7 @@ for page_number in range(1, total_pages + 1):
 
 # Create a DataFrame from the data
 df = pd.DataFrame(data)
+df.drop_duplicates(inplace=True)
 
 # Initialize a list to store detailed scraped data
 scraped_data = []
