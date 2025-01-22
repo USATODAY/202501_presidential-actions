@@ -2,30 +2,36 @@ name: Scrape Executive Orders
 
 on:
   push:
+    branches:
+      - main
   workflow_dispatch:
   schedule:
-    - cron:  '0 * * * *'
+    - cron: '0 * * * *'
 
 jobs:
   scheduled:
     runs-on: ubuntu-latest
     steps:
-    - name: Check out this repo
-      uses: actions/checkout@v3
-    - name: Use Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-        cache: 'pip'
-    - name: Install dependencies
-      run: pip install -r requirements.txt
-    - name: Fetch latest data
-      run: python scrape.py
-    - name: Commit and push if it changed
-      run: |-
-        git config user.name "Automated"
-        git config user.email "actions@users.noreply.github.com"
-        if [[ $(git status --porcelain=v1 2>/dev/null | wc -l) -gt 0 ]]; then
-        git add -A
-        git commit -m "Automated commit: Updates detected" || true
-        git push
+      - name: Check out this repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch latest data
+        run: python scrape.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "Automated"
+          git config user.email "actions@users.noreply.github.com"
+          if [[ $(git status --porcelain) ]]; then
+            git add -A
+            git commit -m "Automated commit: Updates detected"
+            git push
