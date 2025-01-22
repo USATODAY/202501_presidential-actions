@@ -78,12 +78,8 @@ def scrape_details(session, url):
     except AttributeError:
         byline = None
 
-    # try:
-    #     content = ' '.join([p.text.strip() for p in soup.find(
-    #         'div', class_="entry-content wp-block-post-content has-global-padding is-layout-constrained wp-block-post-content-is-layout-constrained"
-    #     ).find_all('p')])
+    # Start of the content extraction
     try:
-        # Extract content from paragraphs, tables, and other block-level elements
         content_section = soup.find(
             'div', class_="entry-content wp-block-post-content has-global-padding is-layout-constrained wp-block-post-content-is-layout-constrained"
         )
@@ -94,16 +90,24 @@ def scrape_details(session, url):
             for p in content_section.find_all('p'):
                 content_parts.append(p.get_text(strip=True))
 
-            # Extract text from tables inside `figure` elements
+            # Extract text from tables inside `figure` elements and capture all rows and columns
             for table in content_section.find_all('table'):
                 for row in table.find_all('tr'):
                     cells = [cell.get_text(strip=True) for cell in row.find_all(['td', 'th'])]
                     content_parts.append(' | '.join(cells))  # Combine table row cells with a delimiter
 
-            # Combine all parts into a single content string
+            # Include other block-level elements like `div`, `span` (e.g., for additional text content)
+            for div in content_section.find_all(['div', 'span']):
+                div_text = div.get_text(strip=True)
+                if div_text:  # Only append non-empty text
+                    content_parts.append(div_text)
+
+            # Combine all parts into a single content string, separated by newlines
             content = '\n'.join(content_parts)
+
         else:
             content = None
+
     except AttributeError:
         content = None
 
@@ -120,7 +124,6 @@ def load_scraped_links():
     try:
         # Load previously scraped data from a CSV file (or database)
         df = pd.read_csv('scraped_whitehouse_posts.csv')
-        df.drop_duplicates(inplace=True)
         return set(df['Link'])  # Return a set of links from the CSV
     except FileNotFoundError:
         return set()  # If no file exists, return an empty set
@@ -128,7 +131,6 @@ def load_scraped_links():
 # Save new data to a CSV file
 def save_scraped_data(new_data):
     df = pd.DataFrame(new_data)
-    df.drop_duplicates(inplace=True)
     df.to_csv('scraped_whitehouse_posts.csv', mode='a', header=False, index=False)
 
 # Create a session
@@ -158,7 +160,6 @@ for page_number in range(1, total_pages + 1):
 
 # Create a DataFrame from the data
 df = pd.DataFrame(data)
-df.drop_duplicates(inplace=True)
 
 # Initialize a list to store detailed scraped data
 scraped_data = []
