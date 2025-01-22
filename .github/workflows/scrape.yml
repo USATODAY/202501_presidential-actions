@@ -35,3 +35,4 @@ jobs:
             git add -A
             git commit -m "Automated commit: Updates detected"
             git push
+          fi
