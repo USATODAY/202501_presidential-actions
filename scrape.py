@@ -78,10 +78,32 @@ def scrape_details(session, url):
     except AttributeError:
         byline = None
 
+    # try:
+    #     content = ' '.join([p.text.strip() for p in soup.find(
+    #         'div', class_="entry-content wp-block-post-content has-global-padding is-layout-constrained wp-block-post-content-is-layout-constrained"
+    #     ).find_all('p')])
     try:
-        content = ' '.join([p.text.strip() for p in soup.find(
+        # Extract content from paragraphs, tables, and other block-level elements
+        content_section = soup.find(
             'div', class_="entry-content wp-block-post-content has-global-padding is-layout-constrained wp-block-post-content-is-layout-constrained"
-        ).find_all('p')])
+        )
+        if content_section:
+            content_parts = []
+
+            # Extract text from all `p` elements
+            for p in content_section.find_all('p'):
+                content_parts.append(p.get_text(strip=True))
+
+            # Extract text from tables inside `figure` elements
+            for table in content_section.find_all('table'):
+                for row in table.find_all('tr'):
+                    cells = [cell.get_text(strip=True) for cell in row.find_all(['td', 'th'])]
+                    content_parts.append(' | '.join(cells))  # Combine table row cells with a delimiter
+
+            # Combine all parts into a single content string
+            content = '\n'.join(content_parts)
+        else:
+            content = None
     except AttributeError:
         content = None
 
