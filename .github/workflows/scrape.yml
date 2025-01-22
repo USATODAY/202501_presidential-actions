@@ -25,14 +25,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install google-cloud-storage
-
-      - name: Configure Google Cloud Credentials
-        env:
-          GCS_CREDENTIALS: ${{ secrets.GCS_CREDENTIALS }}
-        run: |
-          echo "${GCS_CREDENTIALS}" > /tmp/gcs_credentials.json
-          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcs_credentials.json
 
       - name: Fetch latest data and upload
         run: python scrape.py
