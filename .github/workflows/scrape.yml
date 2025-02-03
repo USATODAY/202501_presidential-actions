@@ -27,7 +27,9 @@ jobs:
 
       - name: Fetch latest data and upload
         run: python scrape.py
-
+      - concurrency:
+        group: ${{ github.workflow }}-${{ github.ref }}
+        cancel-in-progress: true
       - name: Commit and push changes
         run: |
           git config user.name "Automated"
@@ -37,3 +39,5 @@ jobs:
             git commit -m "Automated commit: Updates detected"
             git push
           fi
+
+
