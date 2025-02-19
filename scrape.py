@@ -148,11 +148,15 @@ for index, row in df.iterrows():
     except Exception as e:
         print(f"Error scraping URL {url}: {e}")
 
+## remove line breaks and special characters etc..
+def clean_text(series):
+    return series.str.replace(r"[\n\r\xa0\t\u202f]", "", regex=True)
 
 def save_scraped_data(new_data):
     new_df = pd.DataFrame(new_data)
     old_df = pd.read_csv('scraped_whitehouse_posts.csv')
     df=pd.concat([new_df, old_df] )
+    df["Content"] = clean_text(df["Content"])
     df.to_csv('scraped_whitehouse_posts.csv', index=False)
 
 save_scraped_data(scraped_data)
