@@ -7,9 +7,13 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 */6 * * *'
+
 jobs:
   scheduled:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
       - name: Check out this repo
